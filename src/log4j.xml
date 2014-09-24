@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <!-- CONSOLE APPENDER (stdout) -->
+    <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.SimpleLayout"/>
+        <!-- <layout class="org.apache.log4j.TTCCLayout"/> -->
+    </appender>
+	
+    <!-- CONSOLE APPENDER (stderr) -->
+    <appender name="stderr" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.err"/>
+        <layout class="org.apache.log4j.SimpleLayout"/>
+    </appender>
+	
+    <!-- socket.. -->
+    <appender name="socketLogger" class="org.apache.log4j.SocketAppender">
+        <param name="RemoteHost" value="localhost"/>
+        <param name="Port" value="4445"/>
+        <param name="LocationInfo" value="true"/>
+    </appender>
+
+    <!-- BEGIN APPENDER: ROLLING FILE APPENDER (rolling) -->
+    <appender name="rolling" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="najo.log"/>
+        <param name="MaxFileSize" value="100KB"/>
+        <param name="MaxBackupIndex" value="1"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                    value="%d %-5p %-17c{2} %3x - %m%n"/>
+        </layout>
+    </appender>
+
+    <!-- BEGIN APPENDER: LogFactor5 APPENDER (lf5) -->
+    <appender name="lf5" class="org.apache.log4j.lf5.LF5Appender">
+        <param name="MaxNumberOfRecords" value="1000"/>
+    </appender>
+
+    <appender class="org.apache.log4j.FileAppender" name="xml">
+	        <param name="File" value="najo_log.xml"/>
+        <param name="Append" value="false"/>
+        <layout class="org.apache.log4j.xml.XMLLayout"/>
+    </appender>
+
+    <appender name="lf5Rolling" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="najo_lf5.log"/>
+        <param name="MaxBackupIndex" value="5"/>
+        <param name="MaxFileSize" value="100KB"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                    value="[slf5s.start]%d{DATE}[slf5s.DATE]%n  %p[slf5s.PRIORITY]%n%x[slf5s.NDC]%n%t[slf5s.THREAD]%n%c[slf5s.CATEGORY]%n  %l[slf5s.LOCATION]%n%m[slf5s.MESSAGE]%n%n"/>
+        </layout>
+    </appender>
+	
+	<!-- EMAIL appender -->
+    <appender name="email"  class="org.apache.log4j.net.SMTPAppender">
+        <param name="BufferSize" value="512" />
+        <param name="SMTPHost" value="smtp.mail.fr" />
+        <param name="From" value="nom@mail.fr" />
+        <param name="To" value="nom@mail.fr" />
+        <param name="Subject" value="[SMTPAppender] Application message" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+              value="[%d{ISO8601}]%n%n%-5p%n%n%c%n%n%m%n%n" />
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="LevelMin" value="ERROR"/>
+            <param name="LevelMax" value="FATAL"/>
+        </filter>
+    </appender>
+
+    <!-- Historic file appender for this application -->
+    <appender name="historic" class="org.apache.log4j.FileAppender">
+        <param name="File" value="najo_historic.log"/>
+        <param name="ImmediateFlush" value="true"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                    value="%d{yyyy-MM-dd HH:mm:ss} [%p] %m%n"/>
+        </layout>
+    </appender>
+ 
+    <appender name="monitor" class="org.apache.log4j.lf5.LF5Appender">
+        <param name="MaxNumberOfRecords" value="1000"/>
+    </appender>
+	
+	<!-- level value = (fatal, error, warn, info, debug, trace, all, off) -->
+    <logger name="org.najo" additivity="false">
+        <level value="info"/>
+        <!-- <appender-ref ref="rolling"/> -->
+        <appender-ref ref="stdout"/>
+    </logger>
+
+    <!-- the level of logging done at the root level. -->
+    <root>
+        <level value="warn"/>
+        <appender-ref ref="stderr"/>
+        <!--<appender-ref ref="monitor"/>-->
+    </root>
+
+</log4j:configuration>
