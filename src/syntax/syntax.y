@@ -25,7 +25,6 @@
 %{
   import java.io.*;
   
-  import enums.Syntax;
   import enums.TypeNode;
   import enums.TypeValue;
   import enums.TypeMath;
@@ -70,9 +69,9 @@
 %left NOT
 %nonassoc  MUNAIRE
 
-%start   list_commande
+%start   racine
 
-%type <obj> _error list_commande commande
+%type <obj> _error list_commandes commande
 %type <obj> set show print request quit
 %type <obj> for select
 %type <obj> ident number string date hexa bool null on_off
@@ -86,44 +85,42 @@
 
 %%
 
-list_commande :
- commande {najo.showError(); najo.newRequest();} 
- | list_commande commande {najo.showError(); najo.newRequest();}
+racine :
+   list_commandes { }
+// | error { System.out.println(parserError.getError()); }
+;
+
+list_commandes :
+   commande { }
+ | list_commandes commande
 ;
 
 commande :
-   set      		{if (najo.isTrace()) ((Node)$1).display(1);}
- | set ';'          {if (najo.isTrace()) ((Node)$1).display(1);}
- | show             {if (najo.isTrace()) ((Node)$1).display(1);}
- | show ';'         {if (najo.isTrace()) ((Node)$1).display(1);}
+   set      		{najo.trace((Node)$1);}
+ | set ';'          {najo.trace((Node)$1);}
+ | show             {najo.trace((Node)$1);}
+ | show ';'         {najo.trace((Node)$1);}
  | print     		{
  	Node print = new Node(TypeNode.PRINT, (ListNodes)$1);
- 	if (najo.isTrace()) print.display(1); 
- 	najo.stackRequest(print);
- 	najo.showError();
- 	najo.execute();
+ 	najo.trace(print); 
+ 	najo.execute(getLiteral(), print);
  	}
  | request  		{
  	Node request = new Node(TypeNode.REQUEST, (ListNodes)$1);
- 	if (najo.isTrace()) request.display(1); 
- 	najo.stackRequest(request);
- 	najo.showError();
- 	najo.execute();
+ 	najo.trace(request); 
+ 	najo.execute(getLiteral(), request);
  	}
- | quit             {najo.bye(0);}
- | error { najo.setError(""); }
- | error ';' {}
+ | quit {najo.bye(0);}
+;
   
 set :
    SET TRACE on_off { $$ = $3; najo.setTrace((Boolean) najo.getValue((Node) $3));}
  | SET DEBUG on_off { yydebug = true; $$ = $3;}
- | SET error on_off { najo.setError(Syntax.SET_ON.toString()); }
 ;
 
 show :
    SHOW TRACE { $$ = 0;}
  | SHOW DEBUG { $$ = 0;}
- | SHOW error { najo.setError(Syntax.SHOW.toString()); }
 ;
 
 quit :
@@ -140,7 +137,6 @@ print :
        list.add(new Node(TypeNode.LIST_COLUMN, (ListNodes)$2));
        list.add((Node)$3);
        $$ = list;}
- | PRINT error { najo.setError(Syntax.PRINT.definition()); $$ = new ListNodes("print", 0); }
 ;
 
 request :
@@ -222,7 +218,6 @@ opt_format :
      {$$ = INode.NODE_NULL;}
  | FORMAT list_fmt
      {$$ = new Node(TypeNode.FORMAT, "format", (Node)$2);}
- | FORMAT error { najo.setError(Syntax.FORMAT.toString()); $$ = INode.NODE_NULL; }
 ;
 
 list_file :
@@ -285,7 +280,6 @@ fmt_ascii:
    /* empty : le node doit etre creer pour eviter une fin de liste */
       {$$ = INode.NODE_NULL;} 
  | FMTASCII {$$ = new Node(TypeNode.FMT_ASCII,$1);} 
- | error { najo.setError(Syntax.FFORTRAN.toString()); $$ = INode.NODE_NULL; }
 ;
 
 list_fmt_bin: 
@@ -417,7 +411,43 @@ null :
 
   private Yylex lexer;
   private Najo najo;
+  private ParserError parserError = null;
+  private ParserSyntax parserSyntax = ParserSyntax.RACINE;;
   
+  private int tokenpos = 0;
+  private int numline = 1;
+  private StringBuilder literal = new StringBuilder(200);
+  private String nextToken = null;
+  
+	public void setTokenpos(int tokenpos) {
+	    this.tokenpos = tokenpos;
+	}
+	
+	public int getTokenpos() {
+	    return tokenpos;
+	}
+	
+	public void setNumline(int numline) {
+	    this.numline = numline;
+	}
+	
+	public int getNumline() {
+	    return numline;
+	}
+	
+	public void setLiteral(StringBuilder literal) {
+	    this.literal = literal;
+	}
+	
+	public String getLiteral() {
+	    return literal.toString();
+	}
+
+    public void addYytext(String yytext) {
+        literal.append(yytext);
+        nextToken = yytext; // Sauvegarde du token en cours
+    }
+
   private int yylex () {
     int yyl_return = -1;
     try {
@@ -430,25 +460,36 @@ null :
     return yyl_return;
   }
 
+  public Parser(Najo najo, Reader r) throws Exception {
+    this.najo = najo;
+    lexer = new Yylex(r, this);
+  }
+
+  public static Parser compile(Najo najo, Reader r) throws Exception {
+    // parse reader entry
+    Parser yyparser = new Parser(najo, r);
+    yyparser.yydebug = najo.isDebugParsing();
+
+    yyparser.yyparse();
+    
+    return yyparser;
+  }
 
   public void yyerror (String error) {
-     najo.setError(error);
+//     if (error == null) error = "";
+//     error = error + "\n" + parserSyntax.definition();
+     error = parserSyntax.definition();
+     parserError = new ParserError(numline, tokenpos, literal.toString(), error);
   }
 
-
-  public Parser(Najo najo, Reader r) throws Exception {
-    lexer = new Yylex(najo, r, this);
-    this.najo = najo;
+  public ParserError getParserError() {
+     return parserError;
   }
-
-  public static void compile(Najo najo, Reader r) throws Exception {
   
-    Parser yyparser;
-    
-    // parse a file
-    yyparser = new Parser(najo, r);
-    yyparser.yydebug = najo.isDebugParsing();
-    yyparser.yyparse();
-   
+  public void setParserSyntax(ParserSyntax parserSyntax) {
+     this.parserSyntax = parserSyntax;
   }
 
+  public ParserSyntax getParserSyntax() {
+     return parserSyntax;
+  }

@@ -1,4 +1,4 @@
-package grammaire;
+package syntax;
 
 import org.najo.Najo;
 
@@ -13,13 +13,12 @@ import org.najo.Najo;
 
 %{
   private Parser yyparser;
-  private Najo najo;
-  private StringBuffer string = new StringBuffer();
+  private StringBuilder string = new StringBuilder();
   
   private void saveToken() {
-     najo.setNumline(yyline+1);
-     najo.setTokenpos(yycolumn+1);
-     najo.addYytext(yytext());
+     yyparser.setNumline(yyline+1);
+     yyparser.setTokenpos(yycolumn+1);
+     yyparser.addYytext(yytext());
      }
      
   private int token(int tok) {
@@ -27,10 +26,9 @@ import org.najo.Najo;
      return(tok);
      }
      
-  public Yylex(Najo najo, java.io.Reader r, Parser yyparser) {
+  public Yylex(java.io.Reader r, Parser yyparser) {
     this(r);
     this.yyparser = yyparser;
-    this.najo = najo;
   }
 %}
 
@@ -84,10 +82,10 @@ FCTRL = ([tT][0-9]+)
 
 "set"                  	{return token(Parser.SET);}
 "show"              	{return token(Parser.SHOW);}
-"print"              	{return token(Parser.PRINT);}
+"print"              	{yyparser.setParserSyntax(ParserSyntax.PRINT); return token(Parser.PRINT);}
 
 "for"                   {return token(Parser.FOR);}
-"as"                    {return token(Parser.AS);}
+"as"                    {yyparser.setParserSyntax(ParserSyntax.ALIAS); return token(Parser.AS);}
 "type"              	{return token(Parser.TYPE_DEX);}
 "with"              	{return token(Parser.WITH);}
 "define"      			{return token(Parser.DEFINE);}

@@ -1,11 +1,11 @@
-SET TRACE ON
+SET TRACE off
 
 //print 3+5, "test sur \n bout" + " de texte"
 //format binary /* coucou */ as 
 //toto ,, // commentaire
 //titi;
 
-print 20+3+500 * 3 as toto, toto - 23, 3.456 as titi, "test sur \n bout" + " de texte", "Test de cesure", titi
+print 20+3+500 * 3 as toto, toto - 23, 3.456 as titi, "test sur \n bout" ++ " de texte", "Test de cesure", titi
 format ascii as I5, I6, F5.2, , A18 SEPARATED BY "<->";
 
 QUIT;

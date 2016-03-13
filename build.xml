@@ -3,7 +3,7 @@
          JFlex compiler
         </description>
       <!-- set global properties for this build -->
-      <property name="workspace" location="F:\eclipse juno\workspace"/>
+      <property name="workspace" location="D:\eclipse\workspace"/>
       <property name="src" location="src"/>
       <property name="build" location="build"/>
       <taskdef classname="JFlex.anttask.JFlexTask" name="jflex">
@@ -18,11 +18,11 @@
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build}"/>
       </target>
-      <target name="rebuild" depends="cleanGrammaire,compileGrammaire"
+      <target name="rebuild" depends="cleanSyntax,compileSyntax"
               description="Rebuild all " >
           <!-- Compile the java code from ${src} into ${build} -->
       </target>
-      <target name="compileGrammaire" depends="init,jflex,yacc"
+      <target name="compileSyntax" depends="init,jflex,yacc"
             description="compile the source " >
         <!-- Compile the java code from ${src} into ${build} -->
         <javac      srcdir="${src}"
@@ -34,43 +34,33 @@
             description="do the jflex thing">
         <jflex 
           verbose="on"
-          file="${src}/grammaire/najo.flex"
+          file="${src}/syntax/syntax.flex"
         />
         <jflex 
           verbose="on"
-          file="${src}/desc/desc.flex"
+          file="${src}/syntax/syntax.flex"
         />
       </target>
       <!-- Create the java file from yacc -->
       <target name="yacc">
 	      <exec	
       		failonerror="on"
-      		dir="${src}/grammaire" executable="${workspace}\libraries\byaccj1.15\yacc" vmlauncher="no">
+      		dir="${src}/syntax" executable="${workspace}\libraries\byaccj1.15\yacc" vmlauncher="no">
 	      	<arg value="-J"/>
-   	      	<arg value="-Jpackage=grammaire"/>
+   	      	<arg value="-Jpackage=syntax"/>
    	      	<arg value="-Jstack=600"/>
-	    	<arg value="najo.y"/>
-	      </exec>
-	      <exec	
-    		failonerror="on"
-    		dir="${src}/desc" executable="${workspace}\libraries\byaccj1.15\yacc" vmlauncher="no">
-	      	<arg value="-J"/>
- 	      	<arg value="-Jpackage=desc"/>
- 	      	<arg value="-Jstack=600"/>
-	    	<arg value="desc.y"/>
+	    	<arg value="syntax.y"/>
 	      </exec>
       </target>
-      <!-- Clean grammaire -->
-      <target name="cleanGrammaire"
+      <!-- Clean syntax -->
+      <target name="cleanSyntax"
             description="clean up" >
         <!-- Delete the ${build} directory trees -->
   		<delete includeEmptyDirs="true" failonerror="off">
-			<fileset dir="build/grammaire"/>
-			<fileset dir="build/desc"/>
+			<fileset dir="build/syntax"/>
 		</delete>
 		<delete includeemptydirs="true" failonerror="false">
-			<fileset dir="${src}/grammaire" includes="**/Parser.java **/ParserVal.java **/Yylex.java **/yacc.*"/>
-			<fileset dir="${src}/desc" includes="**/Parser.java **/ParserVal.java **/Yylex.java **/yacc.*"/>
+			<fileset dir="${src}/syntax" includes="**/Parser.java **/ParserVal.java **/Yylex.java **/yacc.*"/>
 		</delete>
       </target>
     </project>

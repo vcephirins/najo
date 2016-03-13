@@ -1,7 +1,7 @@
 /**
  * 
  */
-package desc;
+package syntax;
 
 /**
  * ParserError.java.
@@ -11,7 +11,7 @@ package desc;
  * @version 1.0, 17 nov. 2012 <li>Creation</>
  */
 
-class ParserError {
+public class ParserError {
 
     // Token en erreur
     private int numline = 0;
@@ -25,7 +25,8 @@ class ParserError {
      * Interdit l'implémentation.
      */
     @SuppressWarnings("unused")
-    private ParserError() {}
+    private ParserError() {
+    }
 
     /**
      * Constructeur.
@@ -44,10 +45,38 @@ class ParserError {
     }
 
     /**
-     * Affiche l'erreur si exitante et provoque l'arrêt.
+	 * @return the numline
+	 */
+	public int getNumline() {
+		return numline;
+	}
+
+	/**
+	 * @return the tokenpos
+	 */
+	public int getTokenpos() {
+		return tokenpos;
+	}
+
+	/**
+	 * @return the literal
+	 */
+	public String getLiteral() {
+		return literal;
+	}
+
+	/**
+	 * @return the info
+	 */
+	public String getInfo() {
+		return info;
+	}
+
+	/**
+     * Retourne l'erreur.
      * <p>
      * 
-     * @return true si erreur.
+     * @return l'erreur.
      */
     public String getError() {
         String pos = String.format(String.format("%%%ds", tokenpos), "^");

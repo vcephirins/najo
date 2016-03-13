@@ -1,7 +1,5 @@
 package org.najo;
 
-import grammaire.Parser;
-
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStreamReader;
@@ -14,6 +12,8 @@ import org.free.toolboxz.goodies.Proxy;
 import org.najo.Nodes.Node;
 
 import com.spinn3r.log5j.Logger;
+
+import syntax.Parser;
 
 public class Najo {
 
@@ -47,10 +47,6 @@ public class Najo {
     /**
      * Variables generales
      */
-    private int tokenpos = 0;
-    private int numline = 1;
-    private StringBuffer literal = new StringBuffer(200);
-    private String nextToken;
 
     private boolean trace = false;
     private boolean debugParsing = false;
@@ -63,9 +59,10 @@ public class Najo {
     private List<Request> requests = new ArrayList<Request>(limitRequests);
 
     // requete en error
-    private RequestError requestError = null;
-
-    /**
+    // private ParserError requestError = null;
+    private Parser parser = null;
+    
+	/**
      * @return Returns the requests.
      */
     public List<Request> getRequests() {
@@ -78,15 +75,25 @@ public class Najo {
      * 
      * @param racine premier node de la requete.
      */
-    public void stackRequest(Node racine) {
+    private Request stackRequest(String literal, Node racine) {
         try {
-            Request req = new Request(literal.toString(), racine);
-            requests.add(req); // historisation
-            if (request == null) request = req;
+        	request = new Request(literal, racine);
+            requests.add(request); // historisation
+            return request;
         }
         catch (NajoException ne) {
             throw new NajoRuntimeException(ne);
         }
+    }
+
+    /**
+     * Affichage de la hierachie à partir du noeud donné.
+     * <p>
+     * 
+     * @param racine premier node à afficher..
+     */
+    public void trace(Node racine) {
+    	if (racine != null && isTrace()) racine.display(1);
     }
 
     /**
@@ -117,63 +124,6 @@ public class Najo {
     }
 
     /**
-     * @return the tokenpos.
-     */
-    public int getTokenpos() {
-        return tokenpos;
-    }
-
-    /**
-     * @param tokenpos The tokenpos to set.
-     */
-    public void setTokenpos(int tokenpos) {
-        this.tokenpos = tokenpos;
-    }
-
-    /**
-     * @return the numline.
-     */
-    public int getNumline() {
-        return numline;
-    }
-
-    /**
-     * @param numline The numline to set.
-     */
-    public void setNumline(int numline) {
-        this.numline = numline;
-    }
-
-    /**
-     * @return the literal request.
-     */
-    public String getLiteral() {
-        return literal.toString();
-    }
-
-    /**
-     * Add the token text in literal request.
-     * 
-     * @param yytext The text of token to add.
-     */
-    public void addYytext(String yytext) {
-        literal.append(yytext);
-        nextToken = yytext; // Sauvegarde du token en cours
-    }
-
-    /**
-     * reset environment for new request.
-     */
-    public void newRequest() {
-        // Reset literal and request error
-        literal.setLength(0);
-        requestError = null;
-
-        // Nouvelle requete ?
-        if (nextToken != null) literal.append(nextToken);
-    }
-
-    /**
      * Retourne la valeur réelle du node.
      * <p>
      * 
@@ -190,23 +140,12 @@ public class Najo {
     }
 
     /**
-     * Memorise le contexte de l'erreur.
-     * <p>
-     * 
-     * @param info message complémentaire sur le contexte de l'erreur.
-     */
-    public void setError(String info) {
-        requestError = new RequestError(numline, tokenpos, literal, info);
-    }
-
-    /**
      * Affiche l'erreur de syntaxe.
      * <p>
      */
     public void showError() {
-        if (requestError != null) {
-            System.out.println(requestError.getError());
-            throw new NajoRuntimeException(new NajoException("exception.request.syntax"));
+        if (parser != null && parser.getParserError() != null) {
+            System.out.println(parser.getParserError().getError());
         }
     }
 
@@ -216,9 +155,10 @@ public class Najo {
      * 
      * @throws NajoException
      */
-    public void execute() {
+    public void execute(String literal, Node racine) {
         try {
-            System.out.println(request.getLiteral());
+        	request = stackRequest(literal, racine);
+            System.out.println(literal);
             request.output();
         }
         catch (NajoException ne) {
@@ -351,36 +291,36 @@ public class Najo {
                 indMand++;
             }
 
-            if (indMand != nbMandatoryArgs) { throw new NajoException(new NajoException("exception.navajo.syntax"),
-                "exception.invalidParameter", ""); }
+			if (indMand != nbMandatoryArgs) {
+				throw new NajoException(new NajoException("exception.navajo.syntax"), "exception.invalidParameter", "");
+			}
 
-            // Creation d'une instance
-            Najo najo = new Najo();
+			// Creation d'une instance
+			Najo najo = new Najo();
 
-            if (interactive) {
-                // parse standard input
-                System.out.print("Cmd> ");
-                Parser.compile(najo, new InputStreamReader(System.in));
-            }
-            else {
-                try {
-                    // parse a file
-                    Parser.compile(najo, new FileReader(fileRequest));
-                }
-                catch (FileNotFoundException e) {
-                    throw new NajoException(e, "exception.file.openFile", fileRequest);
-                }
-            }
-        }
-        catch (NajoRuntimeException ne) {
-            ne.getCause().printMessages();
-        }
-        catch (NajoException ne) {
-            ne.printMessages();
-        }
-        catch (Exception e) {
-            // Cas anormal, affichage complet de la trace
-            e.printStackTrace();
-        }
-    }
+			try {
+				if (interactive) {
+					// parse standard input
+					System.out.print("Cmd> ");
+					najo.parser = Parser.compile(najo, new InputStreamReader(System.in));
+					najo.showError();
+				} else {
+					// parse a file
+					najo.parser = Parser.compile(najo, new FileReader(fileRequest));
+					najo.showError();
+				}
+			} catch (FileNotFoundException fne) {
+				throw new NajoException(fne, "exception.file.openFile", fileRequest);
+			} catch (Exception e) {
+				throw new NajoException(e, "exception.request.syntax");
+			}
+		} catch (NajoRuntimeException ne) {
+			ne.getCause().printMessages();
+		} catch (NajoException ne) {
+			ne.printMessages();
+		} catch (Exception e) {
+			// Cas anormal, affichage complet de la trace
+			e.printStackTrace();
+		}
+	}
 }

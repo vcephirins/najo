@@ -3,8 +3,10 @@
  */
 package org.najo.values;
 
+import org.free.toolboxz.date.JulianDate;
 import org.najo.NajoException;
 
+import enums.TypeCond;
 import enums.TypeMath;
 import enums.TypeValue;
 
@@ -107,9 +109,9 @@ public class ValueFmtAscii extends Value {
      * @see org.najo.values.IValue#toShort()
      */
     @Override
-    public Short toShort() {
+    public Integer toShort() {
         if (value == null) return null;
-        return new Short(value);
+        return new Integer(value);
     }
 
     /* (non-Javadoc)
@@ -189,5 +191,17 @@ public class ValueFmtAscii extends Value {
     public Value exprMath(TypeMath type, Value val) throws NajoException {
         return Value.VALUE_NULL;
     }
+
+	@Override
+	public JulianDate toDate() throws NajoException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Value exprCond(TypeCond cond, Value val) throws NajoException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
