@@ -66,6 +66,13 @@ public class ParserError {
 	}
 
 	/**
+	 * @param literal the literal to set
+	 */
+	public void setLiteral(String literal) {
+		this.literal = literal;
+	}
+
+	/**
 	 * @return the info
 	 */
 	public String getInfo() {

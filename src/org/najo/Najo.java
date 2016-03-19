@@ -140,16 +140,6 @@ public class Najo {
     }
 
     /**
-     * Affiche l'erreur de syntaxe.
-     * <p>
-     */
-    public void showError() {
-        if (parser != null && parser.getParserError() != null) {
-            System.out.println(parser.getParserError().getError());
-        }
-    }
-
-    /**
      * Calcul les valeurs de chaque noeud et affiche le résultat.
      * <p>
      * 
@@ -303,11 +293,9 @@ public class Najo {
 					// parse standard input
 					System.out.print("Cmd> ");
 					najo.parser = Parser.compile(najo, new InputStreamReader(System.in));
-					najo.showError();
 				} else {
 					// parse a file
 					najo.parser = Parser.compile(najo, new FileReader(fileRequest));
-					najo.showError();
 				}
 			} catch (FileNotFoundException fne) {
 				throw new NajoException(fne, "exception.file.openFile", fileRequest);

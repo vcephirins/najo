@@ -53,7 +53,7 @@
 %token  FROM GROUP_BY HAVING BREAK ROWID ROWNUM
 %token  FORMAT BIN ASCII SEPARATED_BY
 %token  EQUAL LE GE NE EQEQ AND OR NOT
-%token  TRACE DEBUG
+%token  TRACE DEBUG BREAK_ON_ERROR
 
 %token  GENERATE METADATA EOF
 %token  HELP SET SHOW TYPES_ALL TYPE_DEX LIBRARIES LIBRARIE FUNCTIONS FUNCTION
@@ -71,7 +71,7 @@
 
 %start   racine
 
-%type <obj> _error list_commandes commande
+%type <obj> racine _error list_commandes commande
 %type <obj> set show print request quit
 %type <obj> for select
 %type <obj> ident number string date hexa bool null on_off
@@ -87,53 +87,53 @@
 
 racine :
    list_commandes { }
-// | error { System.out.println(parserError.getError()); }
 ;
 
 list_commandes :
-   commande { }
- | list_commandes commande
+   commande ';' { }
+ | list_commandes commande ';' { }
+ | error ';' { showError(); }
+ | list_commandes error ';' { showError(); }
 ;
 
 commande :
-   set      		{najo.trace((Node)$1);}
- | set ';'          {najo.trace((Node)$1);}
- | show             {najo.trace((Node)$1);}
- | show ';'         {najo.trace((Node)$1);}
+ set           { najo.trace((Node)$1);}
+ | show          { najo.trace((Node)$1);}
  | print     		{
  	Node print = new Node(TypeNode.PRINT, (ListNodes)$1);
  	najo.trace(print); 
- 	najo.execute(getLiteral(), print);
+ 	najo.execute(lexer.getLiteral(), print);
  	}
- | request  		{
+ | request  {
  	Node request = new Node(TypeNode.REQUEST, (ListNodes)$1);
  	najo.trace(request); 
- 	najo.execute(getLiteral(), request);
+ 	najo.execute(lexer.getLiteral(), request);
  	}
- | quit {najo.bye(0);}
+ | quit { najo.bye(0);}
 ;
   
 set :
-   SET TRACE on_off { $$ = $3; najo.setTrace((Boolean) najo.getValue((Node) $3));}
- | SET DEBUG on_off { yydebug = true; $$ = $3;}
+   SET TRACE on_off { pileSyntax.pop(); $$ = $3; najo.setTrace((Boolean) najo.getValue((Node) $3));}
+ | SET DEBUG on_off { pileSyntax.pop(); $$ = $3; yydebug = true;}
+ | SET BREAK_ON_ERROR on_off { pileSyntax.pop(); $$ = $3; breakOnError=((Boolean )najo.getValue((Node) $3));}
 ;
 
 show :
    SHOW TRACE { $$ = 0;}
  | SHOW DEBUG { $$ = 0;}
+ | SHOW BREAK_ON_ERROR { $$ = 0;}
 ;
 
 quit :
    EOF {}
  | QUIT {}
- | QUIT ';' {}
 ;
 
 print :
    PRINT list_expr 
    opt_format                   /* optionnel */
-   ';' 
-      {ListNodes list = new ListNodes("print", 2);
+      {pileSyntax.pop();
+       ListNodes list = new ListNodes("print", 2);
        list.add(new Node(TypeNode.LIST_COLUMN, (ListNodes)$2));
        list.add((Node)$3);
        $$ = list;}
@@ -143,8 +143,8 @@ request :
    for
    select
    opt_format                   /* optionnel */
-   ';' 
-      {ListNodes list = new ListNodes("request", 3);
+      {pileSyntax.pop();
+       ListNodes list = new ListNodes("request", 3);
        list.add(new Node(TypeNode.FOR, (ListNodes)$1));
        list.add(new Node(TypeNode.SELECT, (ListNodes)$2));
        list.add((Node)$3);
@@ -153,9 +153,10 @@ request :
 
 for :
    FOR list_alias  
-   opt_with                    /* optionnel */
-   opt_define ';'              /* optionnel */
-      {ListNodes list = new ListNodes("for", 3);
+   opt_with                 /* optionnel */
+   opt_define               /* optionnel */
+      {pileSyntax.pop();
+       ListNodes list = new ListNodes("for", 3);
        list.add(new Node(TypeNode.LIST_ALIAS, (ListNodes)$2));
        list.add((Node)$3);
        list.add((Node)$4);
@@ -166,14 +167,14 @@ opt_with :
    /* empty */
      {$$ = INode.NODE_NULL;}
  | WITH list_alias
-     {$$ = new Node(TypeNode.WITH, (ListNodes)$2);}
+     {pileSyntax.pop(); $$ = new Node(TypeNode.WITH, (ListNodes)$2);}
 ;
 
 opt_define :
    /* empty */
      {$$ = INode.NODE_NULL;}
  | DEFINE list_interval
-      {$$ = new Node(TypeNode.DEFINE, (ListNodes)$2);}
+      {pileSyntax.pop(); $$ = new Node(TypeNode.DEFINE, (ListNodes)$2);}
 ;
 	   
 select	: 
@@ -183,7 +184,8 @@ select	:
    opt_where                    /* optionnel */
    opt_group_by                 /* optionnel */ 
    opt_break_on                 /* optionnel */
-      {ListNodes list = new ListNodes("for", 3);
+      {pileSyntax.pop();
+       ListNodes list = new ListNodes("for", 3);
        list.add(new Node(TypeNode.LIST_COLUMN, (ListNodes)$2));
        list.add(new Node(TypeNode.FROM, (ListNodes)$4));
        list.add((Node)$5);
@@ -196,14 +198,14 @@ opt_where :
    /* empty */
       {$$ = INode.NODE_NULL;}
  | WHERE expr_cond
-      {$$ = new Node(TypeNode.WHERE,"where",(Node)$2);}
+      { pileSyntax.pop(); $$ = new Node(TypeNode.WHERE,"where",(Node)$2);}
 ;
 	   
 opt_group_by :
    /* empty */
      {$$ = INode.NODE_NULL;}
  | GROUP_BY expr_cond HAVING expr_cond
-     {$$ = new Node(TypeNode.GROUP_BY,"group_by",(Node)$2,(Node)$4); }
+     {pileSyntax.pop(); $$ = new Node(TypeNode.GROUP_BY,"group_by",(Node)$2,(Node)$4); }
 ;
 	   
 opt_break_on :
@@ -217,7 +219,7 @@ opt_format :
    /* empty */
      {$$ = INode.NODE_NULL;}
  | FORMAT list_fmt
-     {$$ = new Node(TypeNode.FORMAT, "format", (Node)$2);}
+     {pileSyntax.pop(); $$ = new Node(TypeNode.FORMAT, "format", (Node)$2);}
 ;
 
 list_file :
@@ -322,8 +324,8 @@ list_alias :
 ;
 
 alias : 
-   expr AS IDENT      {$$ = new NodeAlias(TypeNode.ALIAS, $3, (Node)$1);} 
- | expr_cond AS IDENT {$$ = new NodeAlias(TypeNode.ALIAS, $3, (Node)$1);} 
+   expr AS IDENT      {pileSyntax.pop(); $$ = new NodeAlias(TypeNode.ALIAS, $3, (Node)$1);} 
+ | expr_cond AS IDENT {pileSyntax.pop();  $$ = new NodeAlias(TypeNode.ALIAS, $3, (Node)$1);} 
 ;
 
 expr_cond : 
@@ -412,42 +414,10 @@ null :
   private Yylex lexer;
   private Najo najo;
   private ParserError parserError = null;
-  private ParserSyntax parserSyntax = ParserSyntax.RACINE;;
+  private PileLifo pileSyntax = new PileLifo(ParserSyntax.RACINE);
   
-  private int tokenpos = 0;
-  private int numline = 1;
-  private StringBuilder literal = new StringBuilder(200);
-  private String nextToken = null;
+  private Boolean breakOnError = true;
   
-	public void setTokenpos(int tokenpos) {
-	    this.tokenpos = tokenpos;
-	}
-	
-	public int getTokenpos() {
-	    return tokenpos;
-	}
-	
-	public void setNumline(int numline) {
-	    this.numline = numline;
-	}
-	
-	public int getNumline() {
-	    return numline;
-	}
-	
-	public void setLiteral(StringBuilder literal) {
-	    this.literal = literal;
-	}
-	
-	public String getLiteral() {
-	    return literal.toString();
-	}
-
-    public void addYytext(String yytext) {
-        literal.append(yytext);
-        nextToken = yytext; // Sauvegarde du token en cours
-    }
-
   private int yylex () {
     int yyl_return = -1;
     try {
@@ -476,20 +446,21 @@ null :
   }
 
   public void yyerror (String error) {
-//     if (error == null) error = "";
-//     error = error + "\n" + parserSyntax.definition();
-     error = parserSyntax.definition();
-     parserError = new ParserError(numline, tokenpos, literal.toString(), error);
+     error = ((ParserSyntax) pileSyntax.pop()).definition();
+     parserError = lexer.yyerror(error);
   }
 
-  public ParserError getParserError() {
-     return parserError;
+  private void showError() {
+    /* Mise à jour du literal */
+    parserError.setLiteral(lexer.getLiteral());
+    
+    /* Affichage de l'erreur */
+    System.out.println(parserError.getError());
+    
+    /* Sortie du parser */
+    if (breakOnError) najo.bye(0);
   }
   
-  public void setParserSyntax(ParserSyntax parserSyntax) {
-     this.parserSyntax = parserSyntax;
-  }
-
-  public ParserSyntax getParserSyntax() {
-     return parserSyntax;
+  public PileLifo getPile() {
+     return pileSyntax;
   }

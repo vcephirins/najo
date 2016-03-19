@@ -1,7 +1,5 @@
 package syntax;
 
-import org.najo.Najo;
-
 %%
 
 %byaccj
@@ -15,21 +13,78 @@ import org.najo.Najo;
   private Parser yyparser;
   private StringBuilder string = new StringBuilder();
   
-  private void saveToken() {
-     yyparser.setNumline(yyline+1);
-     yyparser.setTokenpos(yycolumn+1);
-     yyparser.addYytext(yytext());
+  private int tokenpos = 0;
+  private int numline = 1;
+  private StringBuilder literal = new StringBuilder(200);
+  
+  private String nextToken = null;
+  
+	private void setTokenpos(int tokenpos) {
+	    this.tokenpos = tokenpos;
+	}
+	
+	public int getTokenpos() {
+	    return tokenpos;
+	}
+	
+	private void setNumline(int numline) {
+	    this.numline = numline;
+	}
+	
+	public int getNumline() {
+	    return numline;
+	}
+	
+	private void setLiteral(String literal) {
+	    if (literal == null)
+	       this.literal = new StringBuilder(200);
+	    else
+	       this.literal = new StringBuilder(literal);
+	}
+	
+	public String getLiteral() {
+	    return literal.toString();
+	}
+
+    public void addYytext(String yytext) {
+        literal.append(yytext);
+        nextToken = yytext; // Sauvegarde du token en cours
+    }
+
+    public void initCmd() {
+       yyline=0;
+       yycolumn=0;
+       setNumline(0);
+       setTokenpos(0);
+       setLiteral(null);
+       yyparser.getPile().popAll();
+    }
+    
+  private void saveToken(String mot) {
+     setNumline(yyline+1);
+     setTokenpos(yycolumn+1);
+     addYytext(mot);
      }
      
   private int token(int tok) {
-     saveToken();
+     saveToken(yytext());
      return(tok);
      }
      
+  private int token(int tok, ParserSyntax syntax) {
+     yyparser.getPile().push(syntax);
+     return(token(tok));
+     }
+     
+  public ParserError yyerror(String error) {
+       return new ParserError(getNumline(), getTokenpos(), getLiteral(), error);
+  }
+  
   public Yylex(java.io.Reader r, Parser yyparser) {
     this(r);
     this.yyparser = yyparser;
   }
+  
 %}
 
 NL  = \n|\r|\r\n
@@ -79,28 +134,32 @@ FCTRL = ([tT][0-9]+)
 "null"   				{return token(Parser.NULL); }
 "trace"   				{return token(Parser.TRACE); }
 "debug"   				{return token(Parser.DEBUG); }
+"break_on_error"   		{return token(Parser.BREAK_ON_ERROR); }
 
-"set"                  	{return token(Parser.SET);}
-"show"              	{return token(Parser.SHOW);}
-"print"              	{yyparser.setParserSyntax(ParserSyntax.PRINT); return token(Parser.PRINT);}
+/* Groupes principaux d'une commande */
+"set"                  	{initCmd(); return token(Parser.SET, ParserSyntax.SET_ON);}
+"show"              	{initCmd(); return token(Parser.SHOW, ParserSyntax.SHOW);}
+"for"                   {initCmd(); return token(Parser.FOR, ParserSyntax.SELECT);}
+"print"              	{initCmd(); return token(Parser.PRINT, ParserSyntax.PRINT);}
 
-"for"                   {return token(Parser.FOR);}
-"as"                    {yyparser.setParserSyntax(ParserSyntax.ALIAS); return token(Parser.AS);}
-"type"              	{return token(Parser.TYPE_DEX);}
-"with"              	{return token(Parser.WITH);}
-"define"      			{return token(Parser.DEFINE);}
-"group[ \t]+by" 		{return token(Parser.GROUP_BY);}
+/* sous groupes avec syntaxe */
+"as"                    {return token(Parser.AS, ParserSyntax.ALIAS);}
+"with"              	{return token(Parser.WITH, ParserSyntax.WITH);}
+"define"      			{return token(Parser.DEFINE, ParserSyntax.DEFINE);}
+"group[ \t]+by" 		{return token(Parser.GROUP_BY, ParserSyntax.GROUP_BY);}
+"from"              	{return token(Parser.FROM, ParserSyntax.FROM);}
+"where"        			{return token(Parser.WHERE, ParserSyntax.WHERE);}
+
+/* Sous groupes simples */
 "having"      			{return token(Parser.HAVING);}
-"select"     			{return token(Parser.SELECT);}
-"where"        			{return token(Parser.WHERE);}
+"type"              	{return token(Parser.TYPE_DEX);}
 "and"                   {return token(Parser.AND);}
 "or"                    {return token(Parser.OR);}
 "not"                   {return token(Parser.NOT);}
 "true"              	{return token(Parser.BOOL_TRUE);}
 "false"          		{return token(Parser.BOOL_FALSE);}
-"from"              	{return token(Parser.FROM);}
 
-"generate"  			{return token(Parser.GENERATE);}
+"generate"  			{return token(Parser.GENERATE, ParserSyntax.GENERATE_METADATA);}
 "metadata"  			{return token(Parser.METADATA);}
 
 "break"         		{return token(Parser.BREAK);}
@@ -108,7 +167,7 @@ FCTRL = ([tT][0-9]+)
 "off"                    {return token(Parser.OFF);}
 "rowid"         		{return token(Parser.ROWID);}
 "rownum"     			{return token(Parser.ROWNUM);}
-"format"    			{yybegin(FORMAT); return token(Parser.FORMAT);}
+"format"    			{yybegin(FORMAT); return token(Parser.FORMAT, ParserSyntax.FORMAT);}
 }
 
 <YYINITIAL> {
@@ -162,7 +221,7 @@ FCTRL = ([tT][0-9]+)
 		}
 		
 	
-	 \"                   { saveToken(); string.setLength(0); yybegin(STRING); }
+	 \"                   { saveToken(yytext()); string.setLength(0); yybegin(STRING); }
 
 }
 
@@ -170,12 +229,12 @@ FCTRL = ([tT][0-9]+)
   \"                             { yybegin(YYINITIAL); 
                                    yyparser.yylval = new ParserVal(string.toString());
                                    return token(Parser.STRING); }
-  [^\n\r\"\\]+                   { saveToken(); string.append( yytext() ); }
-  \\t                            { saveToken(); string.append('\t'); }
-  \\n                            { saveToken(); string.append('\n'); }
-  \\r                            { saveToken(); string.append('\r'); }
-  \\\"                           { saveToken(); string.append('\"'); }
-  \\                             { saveToken(); string.append('\\'); }
+  [^\n\r\"\\]+                   { saveToken(yytext()); string.append( yytext() ); }
+  \\t                            { saveToken(yytext()); string.append('\t'); }
+  \\n                            { saveToken(yytext()); string.append('\n'); }
+  \\r                            { saveToken(yytext()); string.append('\r'); }
+  \\\"                           { saveToken(yytext()); string.append('\"'); }
+  \\                             { saveToken(yytext()); string.append('\\'); }
 }
 
 <FORMAT> {
@@ -207,9 +266,9 @@ FCTRL = ([tT][0-9]+)
 }
 
 /* Ignore */
-<YYINITIAL, FORMAT, AFMT, BFMT> {CMT}            {saveToken(); /* Comment */}
-<YYINITIAL, FORMAT, AFMT, BFMT> {BLANK}          {saveToken(); /* blank */}
-<YYINITIAL, FORMAT, AFMT, BFMT> {NL}             {saveToken(); /* newline */}
+<YYINITIAL, FORMAT, AFMT, BFMT> {CMT}            {saveToken(""); /* Comment */}
+<YYINITIAL, FORMAT, AFMT, BFMT> {BLANK}          {saveToken(yytext()); /* blank */}
+<YYINITIAL, FORMAT, AFMT, BFMT> {NL}             {saveToken(yytext()); /* newline */}
 
 /* default case */
 . 			{ return token(yycharat(0)); }

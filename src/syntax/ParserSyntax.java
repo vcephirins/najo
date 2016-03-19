@@ -28,7 +28,7 @@ public enum ParserSyntax {
         FMT_ASCII("FORMAT ASCII [AS <ffortran> [, ...]] [SEPARATED BY <string>]", FFORTRAN),
         FORMAT("FORMAT <fmt_binary>|<fmt_ascii>", FMT_BINARY, FMT_ASCII),
         GENERATE_METADATA("FOR <columns> [with] [define] GENERATE METADATA <columns> <from> [where] [group by] [break on] [format]"), 
-        SELECT("FOR <columns> [with] [define] SELECT <columns> <from> [where] [group by] [break on] [format] ;", COLUMNS, WITH, DEFINE, WHERE, GROUP_BY, BREAK_ON, FORMAT), 
+        SELECT("FOR <columns> [with] [define] SELECT <columns> <from> [where] [group by] [break on] [format] ;", COLUMNS, DEFINE, FROM, WHERE, GROUP_BY, BREAK_ON, FORMAT), 
         PRINT("PRINT <columns> [format] ;", COLUMNS, FORMAT), 
         SET_ON("SET [TRACE|DEBUG] [on|off]"), 
         SHOW("SHOW [TRACE|DEBUG] | <ident>"), 
