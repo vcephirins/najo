@@ -6,8 +6,6 @@ package syntax;
 import java.util.ArrayList;
 import java.util.List;
 
-import syntax.ParserSyntax;
-
 /**
  * PileLifo.java.
  * <p>

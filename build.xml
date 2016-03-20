@@ -3,12 +3,12 @@
          JFlex compiler
         </description>
       <!-- set global properties for this build -->
-      <property name="workspace" location="D:\eclipse\workspace"/>
+      <property name="workspace" location=".."/>
       <property name="src" location="src"/>
       <property name="build" location="build"/>
       <taskdef classname="JFlex.anttask.JFlexTask" name="jflex">
       <classpath>
-        <pathelement path="${workspace}\libraries\jflex-1.4.3\lib\JFlex.jar"/>
+        <pathelement path="${workspace}\commonLibs\libraries\jflex-1.4.3\lib\JFlex.jar"/>
       </classpath>
       </taskdef>
       <!-- <taskdef name="yacc" classname="java_cup.anttask.CUPTask"/> -->
@@ -45,7 +45,7 @@
       <target name="yacc">
 	      <exec	
       		failonerror="on"
-      		dir="${src}/syntax" executable="${workspace}\libraries\byaccj1.15\yacc" vmlauncher="no">
+      		dir="${src}/syntax" executable="${workspace}\commonLibs\libraries\byaccj1.15\yacc" vmlauncher="no">
 	      	<arg value="-J"/>
    	      	<arg value="-Jpackage=syntax"/>
    	      	<arg value="-Jstack=600"/>
