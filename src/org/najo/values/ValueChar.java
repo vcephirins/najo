@@ -6,7 +6,7 @@ package org.najo.values;
 import org.free.toolboxz.date.DateException;
 import org.free.toolboxz.date.JulianDate;
 import org.free.toolboxz.exceptions.Messages;
-import org.najo.NajoException;
+import org.najo.exceptions.NajoException;
 
 import enums.TypeCond;
 import enums.TypeMath;
@@ -223,7 +223,7 @@ public class ValueChar extends Value {
             result = new ValueBool(false);
             break;
         default:
-            String mess = Messages.getInstance().getMessage("exception.value.operator", cond.toString(), this.type,
+            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type,
                 val.type);
             result = new ValueError(mess);
             break;
@@ -257,7 +257,7 @@ public class ValueChar extends Value {
                 break;
             case DATE:
             case OBJECT:
-                String mess = Messages.getInstance().getMessage("exception.value.operator", operator.toString(), this.type, val.type);
+                String mess = Messages.getMessage("exception.value.operator", operator.toString(), this.type, val.type);
                 result = new ValueError(mess);
                 break;
             case ERROR:

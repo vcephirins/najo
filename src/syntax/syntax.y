@@ -30,7 +30,7 @@
   import enums.TypeMath;
   import enums.TypeCond;
 
-  import org.najo.Najo;
+  import application.Najo;
   import org.najo.Nodes.INode;
   import org.najo.Nodes.Node;
   import org.najo.Nodes.NodeAlias;

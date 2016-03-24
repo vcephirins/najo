@@ -6,25 +6,29 @@ package org.najo.values;
 import org.free.toolboxz.date.DateException;
 import org.free.toolboxz.date.JulianDate;
 import org.free.toolboxz.exceptions.Messages;
-import org.najo.NajoException;
+import org.najo.exceptions.NajoException;
 
 import enums.TypeCond;
 import enums.TypeMath;
 import enums.TypeValue;
 
 /**
- * ValueString.java. <p>
- * @author  Vincent Cephirins
+ * ValueString.java.
+ * <p>
+ * 
+ * @author Vincent Cephirins
  * @version 1.0, 1 d�c. 2010
- * <li>Creation</>
+ *          <li>Creation</>
  */
 
 public class ValueString extends Value {
 
-    protected String value;       // Value
+    protected String value; // Value
 
     /**
-     * Constructeur.<p>
+     * Constructeur.
+     * <p>
+     * 
      * @param val
      * @throws NajoException
      */
@@ -33,7 +37,9 @@ public class ValueString extends Value {
     }
 
     /**
-     * Constructeur.<p>
+     * Constructeur.
+     * <p>
+     * 
      * @param val
      * @throws NajoException
      */
@@ -47,17 +53,18 @@ public class ValueString extends Value {
         this.dim = 1;
         this.length = val.length();
     }
-    
+
     public void setValue(Value val) throws NajoException {
         /* Conversion into internal type */
         setValue(val.toString());
     }
-    
+
     public String getVal() {
         return value;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.Value#toOnOff()
      */
     @Override
@@ -66,7 +73,8 @@ public class ValueString extends Value {
         return value.equalsIgnoreCase("on");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.Value#toBool()
      */
     @Override
@@ -75,7 +83,8 @@ public class ValueString extends Value {
         return value.equalsIgnoreCase("true");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.Value#toByte()
      */
     @Override
@@ -84,7 +93,8 @@ public class ValueString extends Value {
         return new Byte(value);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.Value#toShort()
      */
     @Override
@@ -93,7 +103,8 @@ public class ValueString extends Value {
         return new Integer(value);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.Value#toInteger()
      */
     @Override
@@ -102,7 +113,8 @@ public class ValueString extends Value {
         return new Integer(value);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.Value#toLong()
      */
     @Override
@@ -111,7 +123,8 @@ public class ValueString extends Value {
         return new Long(value);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.Value#toFloat()
      */
     @Override
@@ -120,7 +133,8 @@ public class ValueString extends Value {
         return new Float(value);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.Value#toDouble()
      */
     @Override
@@ -129,7 +143,8 @@ public class ValueString extends Value {
         return new Double(value);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.Value#toChar()
      */
     @Override
@@ -138,7 +153,8 @@ public class ValueString extends Value {
         return new Character(value.charAt(0));
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.najo.values.IValue#toDate()
      */
     @Override
@@ -151,14 +167,17 @@ public class ValueString extends Value {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         return (value == null)? TypeValue.NULL.toString() : value;
     }
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
      * @see java.lang.Object#toString(String)
      */
     @Override
@@ -167,7 +186,8 @@ public class ValueString extends Value {
         return String.format(format, value);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     @Override
@@ -205,8 +225,7 @@ public class ValueString extends Value {
             result = new ValueBool(false);
             break;
         default:
-            String mess = Messages.getInstance().getMessage("exception.value.operator", cond.toString(), this.type,
-                val.type);
+            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type, val.type);
             result = new ValueError(mess);
             break;
         }

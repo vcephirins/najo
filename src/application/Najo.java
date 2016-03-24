@@ -1,18 +1,28 @@
-package org.najo;
+package application;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
+
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.log4j.Level;
 import org.free.toolboxz.exceptions.Messages;
 import org.free.toolboxz.goodies.Proxy;
+import org.najo.Request;
 import org.najo.Nodes.Node;
+import org.najo.exceptions.NajoException;
+import org.najo.exceptions.NajoRuntimeException;
 
 import com.spinn3r.log5j.Logger;
 
+import enums.LangType;
+import jdk.nashorn.internal.ir.Labels;
 import syntax.Parser;
 
 public class Najo {
@@ -47,6 +57,11 @@ public class Najo {
     /**
      * Variables generales
      */
+
+    // Configuration du projets
+    static private Preferences prefs = Preferences.userNodeForPackage(Najo.class);
+
+    static final public FileFilter NJO_EXT = new FileNameExtensionFilter("najo (*.njo)", "njo");
 
     private boolean trace = false;
     private boolean debugParsing = false;
@@ -140,6 +155,13 @@ public class Najo {
     }
 
     /**
+     * @return the prefs
+     */
+    public Preferences getPrefs() {
+        return prefs;
+    }
+
+    /**
      * Calcul les valeurs de chaque noeud et affiche le résultat.
      * <p>
      * 
@@ -217,9 +239,11 @@ public class Najo {
      */
     public static void main(String[] args) throws NajoException {
 
-        try {
+        // Chargement des messages d'exception applicatifs
+        LOGGER.setLevel(Level.INFO);
+        LOGGER.info("Najo is pending");
 
-            LOGGER.info("Najo is pending");
+        try {
 
             int nbMandatoryArgs = 1;
             int indMand = 0;
@@ -229,27 +253,35 @@ public class Najo {
 
             String fileRequest = null;
 
-            // Chargement du fichier des messages applicatifs
-            Messages.getInstance().load("messagesException");
-
+            // Chargement du fichier des messages applicatifs/erreurs
+            LangType lt;
+            try {
+                lt = LangType.valueOf(prefs.get("locale", LangType.FRANCAIS.name()));
+            }
+            catch (Exception e) {
+                lt = LangType.ENGLISH;
+            }
+            Messages.load("org.najo.exceptions.messagesException", lt.getLocale());
+            
             for (int indArg = 0; indArg < args.length; indArg++) {
-                if (args[indArg].startsWith("-h") || args[indArg].equals("--help")) { throw new NajoException(
-                    "exception.navajo.syntax"); }
-                if (args[indArg].startsWith("-v") || args[indArg].equals("--version")) {
+                if (args[indArg].equals("-h") || args[indArg].equals("--help")) {
+                    throw new NajoException("exception.syntax");
+                }
+                else if (args[indArg].equals("-v") || args[indArg].equals("--version")) {
                     LOGGER.info("Najo version : " + Version.getVersion());
                     continue;
                 }
-                if (args[indArg].startsWith("-t") || args[indArg].equals("--trace")) {
+                else if (args[indArg].equals("-t") || args[indArg].equals("--trace")) {
                     LOGGER.setLevel(Level.DEBUG);
                     continue;
                 }
-                if (args[indArg].startsWith("-i") || args[indArg].equals("--interactive")) {
+                else if (args[indArg].equals("-i") || args[indArg].equals("--interactive")) {
                     // Interactive mode
                     interactive = true;
                     indMand++;
                     continue;
                 }
-                if (args[indArg].startsWith("-p") || args[indArg].equals("--proxy")) {
+                else if (args[indArg].equals("-p") || args[indArg].equals("--proxy")) {
                     // configuration du proxy
                     indArg++;
                     String[] proxyArgs = args[indArg].split("[/:@]");
@@ -268,9 +300,12 @@ public class Najo {
                         proxy = new Proxy(proxyArgs[2], proxyArgs[3], proxyArgs[0], proxyArgs[1]);
                         break;
                     default:
-                        throw new NajoException("exception.navajo.syntax");
+                        throw new NajoException("exception.syntax");
                     }
                     continue;
+                }
+                else if (args[indArg].startsWith("-")) {
+                    throw new NajoException(new NajoException("exception.syntax"), "exception.invalidParameter", args[indArg]);
                 }
 
                 // Arguments obligatoires
@@ -282,7 +317,7 @@ public class Najo {
             }
 
 			if (indMand != nbMandatoryArgs) {
-				throw new NajoException(new NajoException("exception.navajo.syntax"), "exception.invalidParameter", "");
+				throw new NajoException(new NajoException("exception.syntax"), "exception.invalidParameter", "");
 			}
 
 			// Creation d'une instance
@@ -303,9 +338,16 @@ public class Najo {
 				throw new NajoException(e, "exception.request.syntax");
 			}
 		} catch (NajoRuntimeException ne) {
-			ne.getCause().printMessages();
+                ne.getCause().printMessages();
 		} catch (NajoException ne) {
-			ne.printMessages();
+                ne.printMessages();
+            // Affichage ecran
+//            StringBuilder mess = new StringBuilder(80 * se.getMessages().size());
+//            for (String part : se.getMessages()) {
+//                mess.append(part).append("\n");
+//                ;
+//            }
+//            JOptionPane.showMessageDialog(null, mess, "alert", JOptionPane.ERROR_MESSAGE);
 		} catch (Exception e) {
 			// Cas anormal, affichage complet de la trace
 			e.printStackTrace();

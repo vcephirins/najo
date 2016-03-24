@@ -5,7 +5,7 @@ package org.najo.values;
 
 import org.free.toolboxz.date.DateException;
 import org.free.toolboxz.date.JulianDate;
-import org.najo.NajoException;
+import org.najo.exceptions.NajoException;
 
 import enums.TypeCond;
 import enums.TypeMath;

@@ -25,12 +25,14 @@ package syntax;
   import enums.TypeMath;
   import enums.TypeCond;
 
-  import org.najo.Najo;
-  import org.najo.Nodes.INode;
+import org.najo.Nodes.INode;
   import org.najo.Nodes.Node;
   import org.najo.Nodes.NodeAlias;
   import org.najo.Nodes.NodeValue;
-  import org.najo.Nodes.NodeMath;
+
+import application.Najo;
+
+import org.najo.Nodes.NodeMath;
   import org.najo.Nodes.NodeCond;
   import org.najo.Nodes.ListNodes;
   

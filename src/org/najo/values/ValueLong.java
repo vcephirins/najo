@@ -5,7 +5,7 @@ package org.najo.values;
 
 import org.free.toolboxz.date.JulianDate;
 import org.free.toolboxz.exceptions.Messages;
-import org.najo.NajoException;
+import org.najo.exceptions.NajoException;
 
 import enums.TypeCond;
 import enums.TypeMath;
@@ -202,7 +202,7 @@ public class ValueLong extends Value {
                 result = new ValueDouble(value + val.toDouble());
                 break;
             case OBJECT:
-                String mess = Messages.getInstance().getMessage("exception.value.incompatible", this.type, val.type);
+                String mess = Messages.getMessage("exception.value.incompatible", this.type, val.type);
                 result = new ValueError(mess);
                 break;
             case ERROR:

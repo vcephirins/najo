@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.najo;
+package org.najo.exceptions;
 
 /**
  * Class d'encapsulation d'exception evitant les déclarations throws. <p>

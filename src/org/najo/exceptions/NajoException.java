@@ -1,4 +1,4 @@
-package org.najo;
+package org.najo.exceptions;
 
 import org.free.toolboxz.exceptions.LoggerException;
 

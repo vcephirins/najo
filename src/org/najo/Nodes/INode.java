@@ -3,7 +3,7 @@
  */
 package org.najo.Nodes;
 
-import org.najo.NajoException;
+import org.najo.exceptions.NajoException;
 import org.najo.values.Value;
 
 import enums.TypeNode;

@@ -5,6 +5,6 @@
 	<classpathentry kind="lib" path="/commonLibs/libraries/jflex-1.4.3/lib/JFlex.jar"/>
 	<classpathentry kind="lib" path="/commonLibs/libraries/apache-log4j-1.2.15/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="/commonLibs/libraries/log5j-1.2/log5j-1.2.jar"/>
-	<classpathentry kind="lib" path="/commonLibs/libraries/toolboxz_v1.0.jar"/>
+	<classpathentry kind="lib" path="/commonLibs/libraries/toolboxz_v1.0.jar" sourcepath="/toolboxz/src"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -3,7 +3,7 @@
  */
 package org.najo.Nodes;
 
-import org.najo.NajoException;
+import org.najo.exceptions.NajoException;
 import org.najo.values.Value;
 import org.najo.values.ValueNull;
 import org.najo.values.ValueString;
