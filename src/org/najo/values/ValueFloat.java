@@ -4,12 +4,11 @@
 package org.najo.values;
 
 import org.free.toolboxz.date.JulianDate;
-import org.free.toolboxz.exceptions.Messages;
+import org.najo.enums.TypeCond;
+import org.najo.enums.TypeMath;
+import org.najo.enums.TypeValue;
 import org.najo.exceptions.NajoException;
-
-import enums.TypeCond;
-import enums.TypeMath;
-import enums.TypeValue;
+import org.najo.exceptions.NajoMessages;
 
 /**
  * ValueFloat.java. <p>
@@ -201,7 +200,7 @@ public class ValueFloat extends Value {
                 result = new ValueDouble(value + val.toDouble());
                 break;
             case OBJECT:
-                String mess = Messages.getMessage("exception.value.incompatible", this.type, val.type);
+                String mess = NajoMessages.getMessage("exception.value.incompatible", this.type, val.type);
                 result = new ValueError(mess);
                 break;
             case ERROR:

@@ -8,12 +8,11 @@ import org.najo.Nodes.IndexNode;
 import org.najo.Nodes.ListNodes;
 import org.najo.Nodes.Node;
 import org.najo.Nodes.NodeAlias;
+import org.najo.enums.TypeNode;
 import org.najo.exceptions.NajoException;
 import org.najo.values.Value;
 import org.najo.values.ValueFmtAscii;
 import org.najo.values.ValueNull;
-
-import enums.TypeNode;
 
 /**
  * Request.java.

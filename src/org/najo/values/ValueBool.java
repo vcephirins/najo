@@ -4,13 +4,12 @@
 package org.najo.values;
 
 import org.free.toolboxz.date.JulianDate;
-import org.free.toolboxz.exceptions.Messages;
+import org.najo.enums.TypeCond;
+import org.najo.enums.TypeMath;
+import org.najo.enums.TypeNode;
+import org.najo.enums.TypeValue;
 import org.najo.exceptions.NajoException;
-
-import enums.TypeCond;
-import enums.TypeMath;
-import enums.TypeNode;
-import enums.TypeValue;
+import org.najo.exceptions.NajoMessages;
 
 /**
  * ValueBool.java. <p>
@@ -217,7 +216,7 @@ public class ValueBool extends Value {
                 result = new ValueBool(false);
                 break;
             default:
-                String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type, val.type);
+                String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type, val.type);
                 result = new ValueError(mess);
                 break;
             }
@@ -231,7 +230,7 @@ public class ValueBool extends Value {
     @Override
     public Value exprMath(TypeMath operator, Value val) throws NajoException {
         if (val.getType() == TypeValue.ERROR) return val;
-        String mess = Messages.getMessage("exception.value.operator", operator.toString(), this.type, val.type);
+        String mess = NajoMessages.getMessage("exception.value.operator", operator.toString(), this.type, val.type);
         return new ValueError(mess);
     }
 }

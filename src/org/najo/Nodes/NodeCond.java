@@ -3,13 +3,12 @@
  */
 package org.najo.Nodes;
 
+import org.najo.enums.TypeCond;
+import org.najo.enums.TypeNode;
 import org.najo.exceptions.NajoException;
 import org.najo.values.Value;
 import org.najo.values.ValueNull;
 import org.najo.values.ValueString;
-
-import enums.TypeCond;
-import enums.TypeNode;
 
 /**
  * NodeCond.java. <p>

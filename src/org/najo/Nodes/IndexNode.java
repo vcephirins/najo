@@ -6,7 +6,7 @@ package org.najo.Nodes;
 import java.util.Collection;
 import java.util.TreeSet;
 
-import enums.TypeNode;
+import org.najo.enums.TypeNode;
 
 /**
  * IndexNode.java. <p>

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package enums;
+package org.najo.enums;
 
 /**
  * TypeMath.java. <p>

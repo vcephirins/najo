@@ -5,12 +5,11 @@ package org.najo.values;
 
 import org.free.toolboxz.date.DateException;
 import org.free.toolboxz.date.JulianDate;
-import org.free.toolboxz.exceptions.Messages;
+import org.najo.enums.TypeCond;
+import org.najo.enums.TypeMath;
+import org.najo.enums.TypeValue;
 import org.najo.exceptions.NajoException;
-
-import enums.TypeCond;
-import enums.TypeMath;
-import enums.TypeValue;
+import org.najo.exceptions.NajoMessages;
 
 /**
  * ValueString.java.
@@ -225,7 +224,7 @@ public class ValueString extends Value {
             result = new ValueBool(false);
             break;
         default:
-            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type, val.type);
+            String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type, val.type);
             result = new ValueError(mess);
             break;
         }

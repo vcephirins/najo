@@ -19,19 +19,16 @@ package syntax;
 
 //#line 26 "syntax.y"
   import java.io.*;
-  
-  import enums.TypeNode;
-  import enums.TypeValue;
-  import enums.TypeMath;
-  import enums.TypeCond;
 
 import org.najo.Nodes.INode;
   import org.najo.Nodes.Node;
   import org.najo.Nodes.NodeAlias;
   import org.najo.Nodes.NodeValue;
-
-import application.Najo;
-
+import org.najo.applications.Najo;
+import org.najo.enums.TypeCond;
+import org.najo.enums.TypeMath;
+import org.najo.enums.TypeNode;
+import org.najo.enums.TypeValue;
 import org.najo.Nodes.NodeMath;
   import org.najo.Nodes.NodeCond;
   import org.najo.Nodes.ListNodes;

@@ -7,10 +7,10 @@ import org.free.toolboxz.date.JulianDate;
 import org.free.toolboxz.enumPatterns.Patterns;
 import org.free.toolboxz.exceptions.Messages;
 import org.free.toolboxz.exceptions.NotFoundException;
+import org.najo.enums.TypeCond;
+import org.najo.enums.TypeValue;
 import org.najo.exceptions.NajoException;
-
-import enums.TypeCond;
-import enums.TypeValue;
+import org.najo.exceptions.NajoMessages;
 
 /**
  * Value.java.
@@ -129,7 +129,7 @@ public abstract class Value implements IValue, Comparable<Value> {
         case SUP:
         case LE:
         case LESS:
-            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type,
+            String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type,
                 type);
             result = new ValueError(mess);
             break;
@@ -163,7 +163,7 @@ public abstract class Value implements IValue, Comparable<Value> {
         case AND:
         case OR:
         case NOT:
-            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type,
+            String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type,
                 type);
             result = new ValueError(mess);
             break;
@@ -197,7 +197,7 @@ public abstract class Value implements IValue, Comparable<Value> {
         case AND:
         case OR:
         case NOT:
-            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type,
+            String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type,
                 type);
             result = new ValueError(mess);
             break;
@@ -231,7 +231,7 @@ public abstract class Value implements IValue, Comparable<Value> {
         case AND:
         case OR:
         case NOT:
-            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type,
+            String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type,
                 type);
             result = new ValueError(mess);
             break;
@@ -265,7 +265,7 @@ public abstract class Value implements IValue, Comparable<Value> {
         case AND:
         case OR:
         case NOT:
-            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type,
+            String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type,
                 type);
             result = new ValueError(mess);
             break;
@@ -299,7 +299,7 @@ public abstract class Value implements IValue, Comparable<Value> {
         case AND:
         case OR:
         case NOT:
-            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type,
+            String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type,
                 type);
             result = new ValueError(mess);
             break;
@@ -333,7 +333,7 @@ public abstract class Value implements IValue, Comparable<Value> {
         case AND:
         case OR:
         case NOT:
-            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type,
+            String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type,
                 type);
             result = new ValueError(mess);
             break;
@@ -367,7 +367,7 @@ public abstract class Value implements IValue, Comparable<Value> {
         case AND:
         case OR:
         case NOT:
-            String mess = Messages.getMessage("exception.value.operator", cond.toString(), this.type,
+            String mess = NajoMessages.getMessage("exception.value.operator", cond.toString(), this.type,
                 type);
             result = new ValueError(mess);
             break;

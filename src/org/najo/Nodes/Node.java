@@ -3,12 +3,11 @@
  */
 package org.najo.Nodes;
 
+import org.najo.enums.TypeNode;
 import org.najo.exceptions.NajoException;
 import org.najo.values.Value;
 import org.najo.values.ValueFmtAscii;
 import org.najo.values.ValueString;
-
-import enums.TypeNode;
 
 /**
  * Node.java.

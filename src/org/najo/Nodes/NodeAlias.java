@@ -3,7 +3,7 @@
  */
 package org.najo.Nodes;
 
-import enums.TypeNode;
+import org.najo.enums.TypeNode;
 
 /**
  * NodeAlias.java. <p>

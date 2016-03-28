@@ -3,10 +3,9 @@
  */
 package org.najo.Nodes;
 
+import org.najo.enums.TypeNode;
 import org.najo.exceptions.NajoException;
 import org.najo.values.Value;
-
-import enums.TypeNode;
 
 /**
  * INode.java. <p>

@@ -4,9 +4,8 @@
 package org.najo;
 
 import org.najo.Nodes.INode;
+import org.najo.enums.TypeEntry;
 import org.najo.values.Value;
-
-import enums.TypeEntry;
 
 /**
  * Column.java. <p>

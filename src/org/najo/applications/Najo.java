@@ -1,28 +1,28 @@
-package application;
+package org.najo.applications;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.security.AccessController;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
-import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.log4j.Level;
-import org.free.toolboxz.exceptions.Messages;
 import org.free.toolboxz.goodies.Proxy;
 import org.najo.Request;
 import org.najo.Nodes.Node;
+import org.najo.enums.LangType;
 import org.najo.exceptions.NajoException;
+import org.najo.exceptions.NajoMessages;
 import org.najo.exceptions.NajoRuntimeException;
 
 import com.spinn3r.log5j.Logger;
 
-import enums.LangType;
-import jdk.nashorn.internal.ir.Labels;
 import syntax.Parser;
 
 public class Najo {
@@ -58,8 +58,8 @@ public class Najo {
      * Variables generales
      */
 
-    // Configuration du projets
-    static private Preferences prefs = Preferences.userNodeForPackage(Najo.class);
+    // Configuration utilisateur du projets
+    static private Preferences prefs = null;
 
     static final public FileFilter NJO_EXT = new FileNameExtensionFilter("najo (*.njo)", "njo");
 
@@ -77,6 +77,23 @@ public class Najo {
     // private ParserError requestError = null;
     private Parser parser = null;
     
+    
+	/**
+	 * 
+	 */
+	private Najo() {
+		try {
+	        SecurityManager security = System.getSecurityManager();
+	        if (security != null) {
+			    Permission prefsPerm = new RuntimePermission("preferences");
+	            security.checkPermission(prefsPerm);
+				prefs = Preferences.userNodeForPackage(Najo.class);
+	        }
+		} catch (SecurityException se) {
+			// Evite l'affichage du message d'erreur
+		}			
+	}
+
 	/**
      * @return Returns the requests.
      */
@@ -261,7 +278,7 @@ public class Najo {
             catch (Exception e) {
                 lt = LangType.ENGLISH;
             }
-            Messages.load("org.najo.exceptions.messagesException", lt.getLocale());
+            NajoMessages.load("org.najo.exceptions.messagesException", lt.getLocale());
             
             for (int indArg = 0; indArg < args.length; indArg++) {
                 if (args[indArg].equals("-h") || args[indArg].equals("--help")) {

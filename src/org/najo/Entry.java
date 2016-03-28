@@ -5,7 +5,7 @@ package org.najo;
 
 import java.io.FileReader;
 
-import enums.TypeEntry;
+import org.najo.enums.TypeEntry;
 
 /**
  * Entry.java.

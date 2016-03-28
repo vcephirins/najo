@@ -4,6 +4,8 @@
 package org.najo.Nodes;
 
 import org.free.toolboxz.date.DateException;
+import org.najo.enums.TypeNode;
+import org.najo.enums.TypeValue;
 import org.najo.exceptions.NajoException;
 import org.najo.values.Value;
 import org.najo.values.ValueBool;
@@ -19,9 +21,6 @@ import org.najo.values.ValueLong;
 import org.najo.values.ValueNull;
 import org.najo.values.ValueOnOff;
 import org.najo.values.ValueString;
-
-import enums.TypeNode;
-import enums.TypeValue;
 
 /**
  * NodeValue.java. <p>

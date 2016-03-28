@@ -1,7 +1,7 @@
 /**
  * 
  */
-package enums;
+package org.najo.enums;
 
 /**
  * TypeDate.java. <p>

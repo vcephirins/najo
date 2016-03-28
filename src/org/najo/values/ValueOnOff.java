@@ -3,9 +3,8 @@
  */
 package org.najo.values;
 
+import org.najo.enums.TypeValue;
 import org.najo.exceptions.NajoException;
-
-import enums.TypeValue;
 
 /**
  * ValueOnOff.java. <p>
