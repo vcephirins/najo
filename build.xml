@@ -1,66 +1,73 @@
-    <project name="najo" default="rebuild" basedir=".">
-        <description>
+<project name="najo" default="rebuild" basedir=".">
+	<description>
          JFlex compiler
         </description>
-      <!-- set global properties for this build -->
-      <property name="workspace" location=".."/>
-      <property name="src" location="src"/>
-      <property name="build" location="build"/>
-      <taskdef classname="JFlex.anttask.JFlexTask" name="jflex">
-      <classpath>
-        <pathelement path="${workspace}\commonLibs\libraries\jflex-1.4.3\lib\JFlex.jar"/>
-      </classpath>
-      </taskdef>
-      <!-- <taskdef name="yacc" classname="java_cup.anttask.CUPTask"/> -->
-      <target name="init">
-        <!-- Create the time stamp -->
-        <tstamp/>
-        <!-- Create the build directory structure used by compile -->
-        <mkdir dir="${build}"/>
-      </target>
-      <target name="rebuild" depends="cleanSyntax,compileSyntax"
-              description="Rebuild all " >
-          <!-- Compile the java code from ${src} into ${build} -->
-      </target>
-      <target name="compileSyntax" depends="init,jflex,yacc"
-            description="compile the source " >
-        <!-- Compile the java code from ${src} into ${build} -->
-        <javac      srcdir="${src}"
-                    destdir="${build}"
-                    debug="on"/>
-      </target>
-      <!-- Create the java file from flex -->
-      <target name="jflex" depends="init"
-            description="do the jflex thing">
-        <jflex 
-          verbose="on"
-          file="${src}/syntax/syntax.flex"
-        />
-        <jflex 
-          verbose="on"
-          file="${src}/syntax/syntax.flex"
-        />
-      </target>
-      <!-- Create the java file from yacc -->
-      <target name="yacc">
-	      <exec	
-      		failonerror="on"
-      		dir="${src}/syntax" executable="${workspace}\commonLibs\libraries\byaccj1.15\yacc" vmlauncher="no">
-	      	<arg value="-J"/>
-   	      	<arg value="-Jpackage=syntax"/>
-   	      	<arg value="-Jstack=600"/>
-	    	<arg value="syntax.y"/>
-	      </exec>
-      </target>
-      <!-- Clean syntax -->
-      <target name="cleanSyntax"
-            description="clean up" >
-        <!-- Delete the ${build} directory trees -->
-  		<delete includeEmptyDirs="true" failonerror="off">
-			<fileset dir="build/syntax"/>
+	<!-- set global properties for this build -->
+	<property environment="env" />
+	<property name="ECLIPSE_HOME" value="C:/Program Files (x86)/eclipse_mars2/" />
+	<property name="workspace" location=".." />
+	<property name="commonLibs.location" value="${workspace}/commonLibs" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.8" />
+	<property name="source" value="1.8" />
+	<property name="src" location="src" />
+	<property name="build" location="build" />
+	<path id="najo.classpath">
+		<pathelement location="${build}" />
+		<pathelement location="${commonLibs.location}/libraries/apache-log4j-1.2.15/log4j-1.2.15.jar" />
+		<pathelement location="${commonLibs.location}/libraries/log5j-1.2/log5j-1.2.jar" />
+		<pathelement location="${commonLibs.location}/libraries/toolboxz_v1.0.jar" />
+	</path>
+
+	<taskdef classname="JFlex.anttask.JFlexTask" name="jflex">
+		<classpath>
+			<pathelement path="${commonLibs.location}\libraries\jflex-1.4.3\lib\JFlex.jar" />
+		</classpath>
+	</taskdef>
+
+	<!-- <taskdef name="yacc" classname="java_cup.anttask.CUPTask"/> -->
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}" />
+	</target>
+	<target name="rebuild" depends="cleanSyntax,build-project" description="Rebuild all ">
+
+	<!-- Compile the java code from ${src} into ${build} -->
+	</target>
+	<target name="build-project" depends="init,jflex,yacc" description="compile the source ">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac debug="true" debuglevel="${debuglevel}" destdir="build" includeantruntime="false" source="${source}" target="${target}">
+			<src path="${src}" />
+			<classpath refid="najo.classpath" />
+		</javac>
+	</target>
+
+	<!-- Create the java file from flex -->
+	<target name="jflex" depends="init" description="do the jflex thing">
+		<jflex verbose="on" file="${src}/syntax/syntax.flex" />
+		<jflex verbose="on" file="${src}/syntax/syntax.flex" />
+	</target>
+
+	<!-- Create the java file from yacc -->
+	<target name="yacc">
+		<exec failonerror="on" dir="${src}/syntax" executable="${workspace}\commonLibs\libraries\byaccj1.15\yacc" vmlauncher="no">
+			<arg value="-J" />
+			<arg value="-Jpackage=syntax" />
+			<arg value="-Jstack=600" />
+			<arg value="syntax.y" />
+		</exec>
+	</target>
+
+	<!-- Clean syntax -->
+	<target name="cleanSyntax" description="clean up">
+		<!-- Delete the ${build} directory trees -->
+		<delete includeEmptyDirs="true" failonerror="off">
+			<fileset dir="build/syntax" />
 		</delete>
 		<delete includeemptydirs="true" failonerror="false">
-			<fileset dir="${src}/syntax" includes="**/Parser.java **/ParserVal.java **/Yylex.java **/yacc.*"/>
+			<fileset dir="${src}/syntax" includes="**/Parser.java **/ParserVal.java **/Yylex.java **/yacc.*" />
 		</delete>
-      </target>
-    </project>
+	</target>
+</project>

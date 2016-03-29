@@ -18,6 +18,7 @@ import org.najo.Request;
 import org.najo.Nodes.Node;
 import org.najo.enums.LangType;
 import org.najo.exceptions.NajoException;
+import org.najo.exceptions.NajoExit;
 import org.najo.exceptions.NajoMessages;
 import org.najo.exceptions.NajoRuntimeException;
 
@@ -244,7 +245,8 @@ public class Najo {
     }
 
     public void bye(int status) {
-        System.exit(status);
+    	throw new NajoExit(status);
+        // System.exit(status);
     }
 
     /**
@@ -258,7 +260,7 @@ public class Najo {
 
         // Chargement des messages d'exception applicatifs
         LOGGER.setLevel(Level.INFO);
-        LOGGER.info("Najo is pending");
+        LOGGER.info("Start");
 
         try {
 
@@ -351,23 +353,31 @@ public class Najo {
 				}
 			} catch (FileNotFoundException fne) {
 				throw new NajoException(fne, "exception.file.openFile", fileRequest);
+			} catch (NajoExit ne) {
+				if (ne.getStatus() != 0)
+					throw new NajoException("exception.request.syntax");
 			} catch (Exception e) {
 				throw new NajoException(e, "exception.request.syntax");
 			}
 		} catch (NajoRuntimeException ne) {
-                ne.getCause().printMessages();
+			// exception particuliere sans logger
+			ne.getCause().printMessages();
 		} catch (NajoException ne) {
-                ne.printMessages();
-            // Affichage ecran
-//            StringBuilder mess = new StringBuilder(80 * se.getMessages().size());
-//            for (String part : se.getMessages()) {
-//                mess.append(part).append("\n");
-//                ;
-//            }
-//            JOptionPane.showMessageDialog(null, mess, "alert", JOptionPane.ERROR_MESSAGE);
+			ne.printMessages();
+			// Affichage ecran
+			// StringBuilder mess = new StringBuilder(80 *
+			// se.getMessages().size());
+			// for (String part : se.getMessages()) {
+			// mess.append(part).append("\n");
+			// ;
+			// }
+			// JOptionPane.showMessageDialog(null, mess, "alert",
+			// JOptionPane.ERROR_MESSAGE);
 		} catch (Exception e) {
 			// Cas anormal, affichage complet de la trace
 			e.printStackTrace();
+		} finally {
+			LOGGER.info("End");
 		}
 	}
 }

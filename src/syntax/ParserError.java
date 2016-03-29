@@ -3,6 +3,8 @@
  */
 package syntax;
 
+import org.najo.exceptions.NajoMessages;
+
 /**
  * ParserError.java.
  * <p>
@@ -87,7 +89,8 @@ public class ParserError {
      */
     public String getError() {
         String pos = String.format(String.format("%%%ds", tokenpos), "^");
-        return String.format("Error at line %d\n%s\n%s\n%s\n", numline, literal, pos, info);
+        return NajoMessages.getMessage("exception.request.at", numline, literal, pos, info);
+//        return String.format("Error at line %d\n%s\n%s\n%s\n", numline, literal, pos, info);
     }
 
 }

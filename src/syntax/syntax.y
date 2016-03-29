@@ -72,13 +72,13 @@
 %start   racine
 
 %type <obj> racine _error list_commandes commande
-%type <obj> set show print request quit
+%type <obj> set show define print request quit
 %type <obj> for select
 %type <obj> ident number string date hexa bool null on_off
-%type <obj> opt_with opt_define opt_where opt_group_by opt_break_on opt_format
+%type <obj> opt_with opt_where opt_group_by opt_break_on opt_format
 %type <obj> list_file file
 %type <obj> list_alias alias list_expr expr expr_cond  
-%type <obj> interval list_interval
+%type <obj> interval
 %type <obj> fmt_ascii fmt_bin list_fmt_ascii list_fmt_bin list_fmt
 %type <obj> function value 
 %type <obj> quit 
@@ -97,9 +97,10 @@ list_commandes :
 ;
 
 commande :
- set           { najo.trace((Node)$1);}
- | show          { najo.trace((Node)$1);}
- | print     		{
+ set           { pileSyntax.pop(); najo.trace((Node)$1);}
+ | show        { najo.trace((Node)$1);}
+ | define      { najo.trace((Node)$1);}
+ | print       {
  	Node print = new Node(TypeNode.PRINT, (ListNodes)$1);
  	najo.trace(print); 
  	najo.execute(lexer.getLiteral(), print);
@@ -113,9 +114,18 @@ commande :
 ;
   
 set :
-   SET TRACE on_off { pileSyntax.pop(); $$ = $3; najo.setTrace((Boolean) najo.getValue((Node) $3));}
- | SET DEBUG on_off { pileSyntax.pop(); $$ = $3; yydebug = true;}
- | SET BREAK_ON_ERROR on_off { pileSyntax.pop(); $$ = $3; breakOnError=((Boolean )najo.getValue((Node) $3));}
+   SET TRACE on_off { 
+      najo.setTrace((Boolean) najo.getValue((Node) $3));
+      $$ = new Node(TypeNode.SET, "TRACE", (Node)$3);
+      }
+ | SET DEBUG on_off {
+      yydebug = true;
+      $$ = new Node(TypeNode.SET, "DEBUG", (Node)$3);
+      }
+ | SET BREAK_ON_ERROR on_off {
+      breakOnError = ((Boolean )najo.getValue((Node) $3));
+      $$ = new Node(TypeNode.SET, "BREAK_ON_ERROR", (Node)$3);
+      }
 ;
 
 show :
@@ -131,50 +141,50 @@ quit :
 
 print :
    PRINT list_expr 
-   opt_format                   /* optionnel */
-      {pileSyntax.pop();
-       ListNodes list = new ListNodes("print", 2);
-       list.add(new Node(TypeNode.LIST_COLUMN, (ListNodes)$2));
-       list.add((Node)$3);
-       $$ = list;}
+   opt_format {                  /* optionnel */
+      pileSyntax.pop();
+      ListNodes list = new ListNodes("print", 2);
+      list.add(new Node(TypeNode.LIST_COLUMN, (ListNodes)$2));
+      list.add((Node)$3);
+      $$ = list;
+      }
 ;
 
 request :
    for
    select
-   opt_format                   /* optionnel */
-      {pileSyntax.pop();
-       ListNodes list = new ListNodes("request", 3);
-       list.add(new Node(TypeNode.FOR, (ListNodes)$1));
-       list.add(new Node(TypeNode.SELECT, (ListNodes)$2));
-       list.add((Node)$3);
-       $$ = list;}
+   opt_format {                 /* optionnel */
+      pileSyntax.pop();
+      ListNodes list = new ListNodes("request", 3);
+      list.add(new Node(TypeNode.FOR, (ListNodes)$1));
+      list.add(new Node(TypeNode.SELECT, (ListNodes)$2));
+      list.add((Node)$3);
+      $$ = list;
+      }
  ;
 
 for :
    FOR list_alias  
-   opt_with                 /* optionnel */
-   opt_define               /* optionnel */
-      {pileSyntax.pop();
-       ListNodes list = new ListNodes("for", 3);
-       list.add(new Node(TypeNode.LIST_ALIAS, (ListNodes)$2));
-       list.add((Node)$3);
-       list.add((Node)$4);
-       $$ = list;}
+   opt_with {                /* optionnel */
+      pileSyntax.pop();
+      ListNodes list = new ListNodes("for", 3);
+      list.add(new Node(TypeNode.LIST_ALIAS, (ListNodes)$2));
+      list.add((Node)$3);
+      $$ = list;
+      }
 ;
 
 opt_with :
    /* empty */
      {$$ = INode.NODE_NULL;}
- | WITH list_alias
-     {pileSyntax.pop(); $$ = new Node(TypeNode.WITH, (ListNodes)$2);}
+ | WITH list_alias {
+     pileSyntax.pop();
+     $$ = new Node(TypeNode.WITH, (ListNodes)$2);
+     }
 ;
 
-opt_define :
-   /* empty */
-     {$$ = INode.NODE_NULL;}
- | DEFINE list_interval
-      {pileSyntax.pop(); $$ = new Node(TypeNode.DEFINE, (ListNodes)$2);}
+define :
+   DEFINE alias {$$ = new Node(TypeNode.DEFINE, "", (Node)$2);}
 ;
 	   
 select	: 
@@ -191,35 +201,36 @@ select	:
        list.add((Node)$5);
        list.add((Node)$6);
        list.add((Node)$7);
-       $$ = list;}
+       $$ = list;
+       }
  ;
 
 opt_where :
    /* empty */
       {$$ = INode.NODE_NULL;}
  | WHERE expr_cond
-      { pileSyntax.pop(); $$ = new Node(TypeNode.WHERE,"where",(Node)$2);}
+      { pileSyntax.pop(); $$ = new Node(TypeNode.WHERE,"",(Node)$2);}
 ;
 	   
 opt_group_by :
    /* empty */
      {$$ = INode.NODE_NULL;}
  | GROUP_BY expr_cond HAVING expr_cond
-     {pileSyntax.pop(); $$ = new Node(TypeNode.GROUP_BY,"group_by",(Node)$2,(Node)$4); }
+     {pileSyntax.pop(); $$ = new Node(TypeNode.GROUP_BY,"",(Node)$2,(Node)$4); }
 ;
 	   
 opt_break_on :
    /* empty */
      {$$ = INode.NODE_NULL;}
  | BREAK ON expr_cond
-     {$$ = new Node(TypeNode.BREAK_ON,"break_on",(Node)$3);}
+     {$$ = new Node(TypeNode.BREAK_ON,"",(Node)$3);}
 ;
 	   
 opt_format :
    /* empty */
      {$$ = INode.NODE_NULL;}
  | FORMAT list_fmt
-     {pileSyntax.pop(); $$ = new Node(TypeNode.FORMAT, "format", (Node)$2);}
+     {pileSyntax.pop(); $$ = new Node(TypeNode.FORMAT, "", (Node)$2);}
 ;
 
 list_file :
@@ -232,29 +243,19 @@ list_file :
 ;
 
 file :
-   string {$$ = new Node(TypeNode.FILE,"file",(Node)$1);}
+   string {$$ = new Node(TypeNode.FILE,"",(Node)$1);}
  | string AS IDENT {$$ = new Node(TypeNode.ALIAS_FILE,$3,(Node)$1);}
  | string WITH IDENT string 
-    {$$ = new Node(TypeNode.FILE,"file",(Node)$1,
+    {$$ = new Node(TypeNode.FILE,"",(Node)$1,
              new Node(TypeNode.TYPE_FILE,$3,(Node)$4));}
  | string AS IDENT WITH IDENT string 
     {$$ = new Node(TypeNode.ALIAS_FILE,$3,(Node)$1,
              new Node(TypeNode.TYPE_FILE, $5,(Node)$6));}
 ;
 	   
-list_interval : 
-   interval 
-      {ListNodes list = new ListNodes("list", 20);
-       list.add((Node)$1);
-        $$ = list;}
- | list_interval ',' interval 
-      {((ListNodes)$1).add((Node)$3);
-       $$ = $1;} 
-;
-
 interval : 
    '[' expr ',' expr ']'
-      {$$ = new Node(TypeNode.INTERVAL,"interval",(Node)$2,(Node)$4);} 
+      {$$ = new Node(TypeNode.INTERVAL,"",(Node)$2,(Node)$4);} 
 ;
 
 list_fmt: 
